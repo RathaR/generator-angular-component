@@ -41,7 +41,6 @@ module.exports = yeoman.generators.Base.extend({
       sourceRoot = resolveSourceRoot(destPath);
       that.config.set('source-root', sourceRoot);
     }
-    //var sourceRoot = resolveSourceRoot(destPath);
     that.log('Resolve project source root as: ' + that.config.get('source-root'));
     var choices = getDirs(sourceRoot);
     var _path = [sourceRoot];
@@ -95,12 +94,13 @@ module.exports = yeoman.generators.Base.extend({
   },
 
   writing: {
-    projectfiles: function () {
+    projectFiles: function () {
       this.moduleName = 'myModule';
-      this.log(this._path);
       var destPath = path.join.apply(null, this._path);
-      this.log('Path: ' + destPath);
-      this.template('_' + this.type + '.js', destPath);
+      this.template(path.join(this.type, this.type + '.js.tpl'), destPath);
+    },
+    testFiles: function() {
+
     }
   }
   //
