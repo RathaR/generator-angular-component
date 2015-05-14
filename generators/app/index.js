@@ -21,7 +21,7 @@ module.exports = yeoman.generators.Base.extend({
     var done = this.async();
     var generator = this;
 
-    var types = ['factory'];
+    var types = ['factory', 'service'];
     var componentTypePrompt = {
       type: 'list',
       name: 'type',
@@ -94,8 +94,4 @@ module.exports = yeoman.generators.Base.extend({
         path.join(this.testRoot, this.componentPath.replace('.js', 'Spec.js')));
     }
   }
-  //
-  //install: function () {
-  //  this.installDependencies();
-  //}
 });
