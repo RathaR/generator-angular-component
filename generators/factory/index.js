@@ -11,7 +11,7 @@ var FactoryGenerator = module.exports = yeoman.generators.NamedBase.extend({
   initializing: function () {
     var helper = this.helper = new Helper(this.config);
     var destPath = this.destPath = this.destinationPath();
-    this.appSourceRoot = helper.getSourceRoot(destPath);
+    this.appSourceRoot = helper.getSourceRoot(destPath, this.log);
     this.testRoot = helper.getTestRoot(destPath);
 
     this.type = 'factory';

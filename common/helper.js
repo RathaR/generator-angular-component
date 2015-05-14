@@ -4,10 +4,10 @@ var path = require('path');
 
 module.exports = function (config) {
 
-  var resolveSourceRoot = function (appRoot) {
+  var resolveSourceRoot = function (appRoot, log) {
     var sourceRoot;
     file.walkSync(appRoot, function (dirPath, _dirs, files) {
-      if (dirPath.indexOf('node_modules') > -1) {
+      if (dirPath.indexOf('node_modules') > -1 || dirPath.indexOf('_public') > -1) {
         return;
       }
       if (_.contains(files, 'app.js')) {

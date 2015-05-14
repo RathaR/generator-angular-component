@@ -6,100 +6,88 @@ var fs = require('fs');
 var file = require('file');
 var _ = require('lodash');
 var path = require('path');
+var Helper = require('../../common/helper');
 
 module.exports = yeoman.generators.Base.extend({
+  initializing: function () {
+    var helper = this.helper = new Helper(this.config);
+    var destPath = this.destPath = this.destinationPath();
+    this.appSourceRoot = helper.getSourceRoot(destPath, this.log);
+    this.testRoot = helper.getTestRoot(destPath);
+
+    this.componentPath = this.name;
+    this.componentPath = helper.normalizeComponentPath(this.appSourceRoot, this.componentPath, this.log);
+    this.componentName = _.last(this.componentPath.split('\\'));
+    this.componentName = this.componentName.replace('.js', '');
+    var _path = path.join(this.appSourceRoot, this.componentPath).split('\\');
+    this.moduleName = _path[_path.length - 2];
+    this.log('Destination path: ' + chalk.bold.yellow(this.destPath));
+    this.log('App source root path: ' + chalk.bold.yellow(this.appSourceRoot));
+    this.log('App test root path: ' + chalk.bold.yellow(this.testRoot));
+    //this.log('Module name: ' + chalk.bold.yellow(this.moduleName));
+    //this.log('Component name: ' + chalk.bold.yellow(this.componentName));
+  },
   prompting: function () {
+    var helper = new Helper(this.config);
     var done = this.async();
     var that = this;
-    this.log(yosay(
-      'Welcome to the superb ' + chalk.red('Component') + ' generator!'
-    ));
-    var destPath = this.destinationPath();
-    var resolveSourceRoot = function (appRoot) {
-      var sourceRoot;
-      file.walkSync(appRoot, function (dirPath, _dirs, files) {
-        if (dirPath.indexOf('node_modules') > -1) {
-          return;
-        }
-        if (_.contains(files, 'app.js')) {
-          sourceRoot = dirPath.replace(destPath, '').substring(1);
-        }
-      });
-      return sourceRoot;
-    };
-    var getDirs = function (path) {
-      var dirs = [];
-      file.walkSync(path, function (dirPath, _dirs, files) {
-        if (dirPath.replace(path, "").substr(1).indexOf('\\') == -1) {
-          dirs.push(dirPath.replace(path, "").substr(1));
-        } else return;
-      });
-      return dirs;
-    };
-    var sourceRoot = that.config.get('source-root');
-    if (_.isUndefined(sourceRoot)) {
-      sourceRoot = resolveSourceRoot(destPath);
-      that.config.set('source-root', sourceRoot);
-    }
-    that.log('Resolve project source root as: ' + that.config.get('source-root'));
-    var choices = getDirs(sourceRoot);
-    var _path = [sourceRoot];
-    var _done = function () {
-      _path.push(that.componentName);
-      that.log('Resulted path: ' + path.join.apply(null, _path));
-      that._path = _path;
-      done();
-    };
+
+    var choices = helper.getDirs(this.sourceRoot);
+    var _path = [this.sourceRoot];
 
     var types = ['service', 'factory', 'provider', 'directive', 'filter', 'value'];
-    that.prompt({
+    var componentTypePrompt = {
       type: 'list',
       name: 'type',
       message: 'Select type:',
       choices: types,
       default: 'service'
-    }, function (props) {
-      that.type = props.type;
-      that.prompt({
-        type: 'input',
-        name: 'componentName',
-        message: 'You component name: ',
-        default: that.type + '.js'
-      }, function (props) {
-        that.componentName = props.componentName;
-        ask();
-      });
-    });
+    };
+    var componentNamePrompt = {
+      type: 'input',
+      name: 'componentName',
+      message: 'You component name: ',
+      default: that.type + '.js'
+    };
+    var componentNameInputHandler = function (props) {
+      that.componentName = props[componentNamePrompt.name];
+      askComponentPath(this.appSourceRoot);
+    };
+    var componentTypeSelectHandler = function (props) {
+      var selectedType = that.type = props[componentTypePrompt.name];
+      this.log('Type: ' + chalk.bold.yellow(this.type));
+      that.prompt(componentNamePrompt, componentNameInputHandler);
+    };
 
-    function ask() {
-      that.prompt({
+    that.prompt(componentTypePrompt, componentTypeSelectHandler);
+
+    function askComponentPath(currentPath) {
+      var directorySelectPrompt = {
         type: 'list',
         name: 'component',
         message: 'Specify path',
-        choices: choices
-      }, function (props) {
-        if (props.component === '') {
-          _done();
+        choices: helper.getDirs(currentPath)
+      };
+      var directorySelectHandler = function (props) {
+        var dir = props[directorySelectPrompt.name];
+        if (dir === '' || choices.length <= 1) {
+          this.componentPath = currentPath;
+          this.log('Component path: ' + chalk.bold.yellow(this.componentPath));
+          done();
         } else {
-          _path.push(props.component);
-          choices = getDirs(path.join.apply(null, _path));
-          if (choices.length > 1) {
-            ask();
-          } else {
-            _done();
-          }
+          askComponentPath(path.join(currentPath, dir));
         }
-      });
+      };
+      that.prompt(directorySelectPrompt, directorySelectHandler);
     }
   },
 
   writing: {
     projectFiles: function () {
-      this.moduleName = 'myModule';
       var destPath = path.join.apply(null, this._path);
       this.template(path.join(this.type, this.type + '.js.tpl'), destPath);
     },
-    testFiles: function() {
+    testFiles: function () {
 
     }
   }
