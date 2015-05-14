@@ -31,10 +31,10 @@ var FactoryGenerator = module.exports = yeoman.generators.NamedBase.extend({
   },
   writing: {
     projectFiles: function () {
-      this.template(path.join(this.type, this.type + '.js.tpl'), path.join(this.appSourceRoot, this.componentPath));
+      this.template(path.join(this.type + '.js.tpl'), path.join(this.appSourceRoot, this.componentPath));
     },
     specFiles: function () {
-      this.template(path.join(this.type, this.type + 'Spec.js.tpl'), path.join(this.testRoot, this.componentPath.replace('.js', 'Spec.js')));
+      this.template(path.join(this.type + 'Spec.js.tpl'), path.join(this.testRoot, this.componentPath.replace('.js', 'Spec.js')));
     }
   }
 });

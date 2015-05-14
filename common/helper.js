@@ -1,10 +1,9 @@
 var file = require('file');
 var _ = require('lodash');
 var path = require('path');
-
 module.exports = function (config) {
 
-  var resolveSourceRoot = function (appRoot, log) {
+  var resolveSourceRoot = function (appRoot) {
     var sourceRoot;
     file.walkSync(appRoot, function (dirPath, _dirs, files) {
       if (dirPath.indexOf('node_modules') > -1 || dirPath.indexOf('_public') > -1) {
@@ -59,7 +58,7 @@ module.exports = function (config) {
     return sourceRoot;
   };
 
-  var normalizeComponentPath = function (_root, _path, log) {
+  var normalizeComponentPath = function (_root, _path) {
     _root = _root.split('\\');
     _path = _path.split('\\');
     var intersection = _.intersection(_root, _path);
