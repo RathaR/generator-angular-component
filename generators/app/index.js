@@ -21,7 +21,7 @@ module.exports = yeoman.generators.Base.extend({
     var done = this.async();
     var generator = this;
 
-    var types = ['factory', 'service'];
+    var types = ['factory', 'service', 'controller'];
     var componentTypePrompt = {
       type: 'list',
       name: 'type',
